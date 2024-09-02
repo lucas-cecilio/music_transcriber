@@ -2,6 +2,8 @@ glob
 magenta
 google-api-python-client
 google-auth
+pyfluidsynth 
+pretty_midi
 google-cloud
 tensorflow
 librosa
