@@ -1,3 +1,4 @@
+pandas
 glob
 magenta
 google-api-python-client
