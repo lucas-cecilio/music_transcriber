@@ -1,5 +1,8 @@
 glob
 magenta
+google-api-python-client
+google-auth
+google-cloud
 tensorflow
 librosa
 numpy
