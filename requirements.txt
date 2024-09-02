@@ -1,0 +1,6 @@
+glob
+magenta
+tensorflow
+librosa
+numpy
+warnings
