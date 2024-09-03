@@ -21,3 +21,8 @@ def load_audio(file_path, sample_rate=SAMPLE_RATE):
 # Example:
 audio_file_path = '/Users/ilyabelov/code/lucas-cecilio/Test_music.wav'
 audio_data = load_audio(audio_file_path)
+
+
+# TODO download_audio
+# note_seq.sequence_proto_to_midi_file(est_ns, '/tmp/transcribed.mid')
+# files.download('/tmp/transcribed.mid')
