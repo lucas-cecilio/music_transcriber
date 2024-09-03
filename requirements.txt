@@ -3,10 +3,11 @@ glob
 magenta
 google-api-python-client
 google-auth
-pyfluidsynth 
+pyfluidsynth
 pretty_midi
 google-cloud
 tensorflow
 librosa
 numpy
 warnings
+note_seq
