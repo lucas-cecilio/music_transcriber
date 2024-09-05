@@ -2,22 +2,22 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 import librosa
 import os
-from mt3 import note_seq
+import note_seq
 from pathlib import Path
+from music_transcriber.inference_model import InferenceModel
 
 app = FastAPI()
 
 # Instantiate the model
 MODEL = "ismir2021"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-checkpoint_path = os.path.join(BASE_DIR, 'checkpoints', MODEL)
+checkpoint_path = os.path.join(BASE_DIR, 'music_transcriber/checkpoints', MODEL)
 #'/home/lucascecilio/code/lucas-cecilio/music_transcriber/checkpoints/ismir2021/'
-
+print(f'!!!!!!!!!!!!!!!!!!!!!!!!!!! {checkpoint_path}')
 inference_model = InferenceModel(checkpoint_path, MODEL)
 
 UPLOAD_DIR = Path("./audio_files")
 MIDI_DIR = Path("./midi_files")
-
 
 
 #upload audio
