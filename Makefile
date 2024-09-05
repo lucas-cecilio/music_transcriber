@@ -22,6 +22,7 @@ setup:
 	@cd mt3/ && pip install -e .
 	@pip install pyfluidsynth
 	@pip install fastapi
+	@pip install python-multipart
 	@pip install uvicorn
 	@echo "Setup done! ✅"
 
