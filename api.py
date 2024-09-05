@@ -9,13 +9,16 @@ app = FastAPI()
 
 # Instantiate the model
 MODEL = "ismir2021"
-checkpoint_path = os.path.join(os.getenv('MT3_CHECKPOINT_DIR', '.'), 'ismir2021/')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+checkpoint_path = os.path.join(BASE_DIR, 'checkpoints', MODEL)
 #'/home/lucascecilio/code/lucas-cecilio/music_transcriber/checkpoints/ismir2021/'
 
 inference_model = InferenceModel(checkpoint_path, MODEL)
 
-UPLOAD_DIR = Path("./uploaded_audio")
-MIDI_DIR = Path("./midi_output")
+UPLOAD_DIR = Path("./audio_files")
+MIDI_DIR = Path("./midi_files")
+
+
 
 #upload audio
 @app.post("/upload-audio/")
