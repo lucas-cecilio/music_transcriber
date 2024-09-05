@@ -1,6 +1,10 @@
 import os
 import librosa
 import note_seq
+from selenium import webdriver
+from bokeh.io.export import export_png
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from inference_model import InferenceModel
 
 # Global variables
@@ -42,42 +46,83 @@ def load_model(model_type: str):
 
 
 def transcript_audio(model, audio_processed):
-    """Transcribes audio to MIDI using the selected model."""
+    '''Transcribes audio to MIDI using the selected model.'''
     
     print('\nTranscripting audio 🔄')
-    audio_transcripted = model(audio_processed)
+    notes_sequence = model(audio_processed)
     
     print('\nTranscription done ✅')
-    return audio_transcripted
+    return notes_sequence
 
 
-def download_midi(audio_transcripted):
-    """Saves the transcribed MIDI to a file."""
+def download_midi(notes_sequence):
+    '''Saves the transcribed MIDI to a file.'''
     
     midi_output_path = os.path.join(BASE_DIR, 'midi_files', 'transcribed_audio.mid')
     
     print('\nDownloading midi 🔄')
-    note_seq.sequence_proto_to_midi_file(audio_transcripted, midi_output_path)
+    note_seq.sequence_proto_to_midi_file(notes_sequence, midi_output_path)
     
     print('\nThe midi file is ready! ✅')
 
 
-# def plot_midi(audio_transcripted):
-#     """Saves a plot of the MIDI sequence to a specified path."""
+def plot_midi(notes_sequence, save_png=False):
+    '''TODO: write docstring'''
+    print('\nCreating a MIDI plot 🔄')
+    plot_midi = note_seq.plot_sequence(notes_sequence, show_figure=False)
     
-#     plot_output_path = os.path.join(BASE_DIR, 'plots', 'midi_plot.png')
+    # Add and adjust title
+    plot_midi.title.text = "MIDI"
+    plot_midi.title.text_font_size = "20pt"
+    plot_midi.title.align = "center"
     
-#     print(f'\nPlotting MIDI sequence and saving to {plot_output_path} 🔄')
-#     note_seq.plot_sequence(audio_transcripted)
-#     print('\nPlot saved ✅')
+    # Adjust axis labels
+    plot_midi.xaxis.axis_label = "Time(s)" 
+    plot_midi.yaxis.axis_label = "Pitch Notes"
+    plot_midi.xaxis.axis_label_text_font_size = "16pt"
+    plot_midi.yaxis.axis_label_text_font_size = "16pt"  
+    
+    # Adjust the size of tick labels
+    plot_midi.xaxis.major_label_text_font_size = "14pt" 
+    plot_midi.yaxis.major_label_text_font_size = "14pt" 
+    
+    if save_png:
+        # Disable toolbar and change dimensions
+        plot_midi.toolbar_location = None  # Remove the toolbar
+        plot_midi.width = 1600  # Increase width for higher quality
+        plot_midi.height = 900  # Increase height for higher quality
+        
+        print('\nSaving a png of MIDI plot 📥')
+        save_plot_midi(plot_midi)
+        
+    print('\nMIDI plot done ✅')
+    return plot_midi
+    
+def save_plot_midi(plot_midi):
+    '''TODO: write docstring'''
+    plot_midi_file = os.path.join(BASE_DIR, 'plot_files', 'plot_midi.png')
+    # Configure Chrome driver in headless mode
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+
+    # Initialize the Chrome driver
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+
+    # Export the figure as a high-quality PNG
+    export_png(plot_midi, filename=plot_midi_file, webdriver=driver)
+
+    # Close the Chrome driver
+    driver.quit()
+
 
 def complete_transcribe(model_type, audio_file):
     '''TODO: Docstring'''
     audio_processed = process_audio(audio_file)
     model = load_model(model_type)
-    audio_transcripted = transcript_audio(model, audio_processed)
-    download_midi(audio_transcripted)
-    # plot_midi(audio_transcripted)
+    notes_sequence = transcript_audio(model, audio_processed)
+    download_midi(notes_sequence)
+    plot_midi(notes_sequence, save_png=True)
 
 def complete_transcribe_terminal():
     # Model selection with validation

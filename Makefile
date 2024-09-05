@@ -23,6 +23,9 @@ setup:
 	@pip install pyfluidsynth
 	@pip install fastapi
 	@pip install uvicorn
+	@pip install selenium 
+	@pip install chromedriver-binary
+	@pip install webdriver-manager  
 	@echo "Setup done! ✅"
 
 run:
