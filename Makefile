@@ -21,10 +21,15 @@ setup:
 	@echo "Pip is now updated! 🎉"
 	@cd mt3/ && pip install -e .
 	@pip install pyfluidsynth
+	@pip install fastapi
+	@pip install uvicorn
 	@echo "Setup done! ✅"
 
 run:
 	@python music_transcriber/main_local.py
+
+run_api:
+	@uvicorn api:app --reload --loop asyncio
 
 install_all:
 	@make mt3
