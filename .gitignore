@@ -1,3 +1,7 @@
-raw_data/
+.env
+
 mt3/
 checkpoints/
+__pycache__
+*checkpoint.ipynb
+*.ipynb_checkpoints
