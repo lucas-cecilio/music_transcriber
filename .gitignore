@@ -3,5 +3,6 @@
 mt3/
 checkpoints/
 __pycache__/
+music_transcriber/__pycache__/
 *checkpoint.ipynb
 *.ipynb_checkpoints
