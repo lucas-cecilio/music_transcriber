@@ -2,19 +2,19 @@ import os
 import librosa
 import note_seq
 from utils import process_audio, load_model, transcript_audio, download_midi, plot_midi
+from music_transcriber.params import *
 from inference_model import InferenceModel
 
-# Global variables
-SAMPLE_RATE = 16000
-AVAILABLE_MODELS = {
-    "piano": "ismir2021",
-    "multi-instrument": "mt3"
-}
+# # Global variables
+# SAMPLE_RATE = 16000
+# AVAILABLE_MODELS = {
+#     "piano": "ismir2021",
+#     "multi-instrument": "mt3"
+# }
 
-# Get the absolute paths
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SF2_PATH = os.path.join(BASE_DIR, 'mt3', 'SGM-v2.01-Sal-Guit-Bass-V1.3.sf2')
-
+# # Get the absolute paths
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# SF2_PATH = os.path.join(BASE_DIR, 'mt3', 'SGM-v2.01-Sal-Guit-Bass-V1.3.sf2')
 
 def complete_transcribe(model_type, audio_file):
     '''TODO: Docstring'''

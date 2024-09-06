@@ -2,6 +2,6 @@
 
 mt3/
 checkpoints/
-__pycache__
+__pycache__/
 *checkpoint.ipynb
 *.ipynb_checkpoints

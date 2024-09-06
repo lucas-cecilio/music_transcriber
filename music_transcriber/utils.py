@@ -5,18 +5,9 @@ from selenium import webdriver
 from bokeh.io.export import export_png
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from inference_model import InferenceModel
+from music_transcriber.inference_model import InferenceModel
+from music_transcriber.params import *
 
-# Global variables
-SAMPLE_RATE = 16000
-AVAILABLE_MODELS = {
-    "piano": "ismir2021",
-    "multi-instrument": "mt3"
-}
-
-# Get the absolute paths
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SF2_PATH = os.path.join(BASE_DIR, 'mt3', 'SGM-v2.01-Sal-Guit-Bass-V1.3.sf2')
 
 def process_audio(audio_file: str):
     '''TODO: write docstring'''
