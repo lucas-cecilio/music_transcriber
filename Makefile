@@ -1,5 +1,5 @@
 apt:
-	@sudo apt update && sudo apt install libfluidsynth3 build-essential libasound2-dev libjack-dev gdal-bin libgdal-dev libcairo2-dev pkg-config python3-dev
+	@sudo apt update && sudo apt install libfluidsynth3 fluidsynth build-essential libasound2-dev libjack-dev gdal-bin libgdal-dev libcairo2-dev pkg-config python3-dev
 	@echo "Packages installed! 🎉"
 
 mt3:

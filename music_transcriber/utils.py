@@ -1,6 +1,8 @@
 import os
 import librosa
 import note_seq
+
+from midi2audio import FluidSynth
 from selenium import webdriver
 from bokeh.io.export import export_png
 from selenium.webdriver.chrome.service import Service
@@ -36,7 +38,7 @@ def load_model(model_type: str):
     return model
 
 
-def transcript_audio(model, audio_processed):
+def transcribe_audio(model, audio_processed):
     '''Transcribes audio to MIDI using the selected model.'''
     
     print('\nTranscripting audio 🔄')
@@ -49,12 +51,23 @@ def transcript_audio(model, audio_processed):
 def download_midi(notes_sequence):
     '''Saves the transcribed MIDI to a file.'''
     
-    midi_output_path = os.path.join(MIDI_FILE_DIR, 'transcribed.mid')
+    midi_file_path = os.path.join(BASE_DIR, 'outputs', 'midi_file', 'transcribed.mid')
     
     print('\nDownloading midi 🔄')
-    note_seq.sequence_proto_to_midi_file(notes_sequence, midi_output_path)
+    note_seq.sequence_proto_to_midi_file(notes_sequence, midi_file_path)
     
     print('\nThe midi file is ready! ✅')
+
+def midi_to_audio():
+    '''TODO: Write docstring'''
+    print('\nDownloading transcribed audio 🔄')
+    
+    midi_file_path = os.path.join(BASE_DIR, 'outputs', 'midi_file', 'transcribed.mid')
+    midi_audio_path = os.path.join(BASE_DIR, 'outputs', 'midi_audio', 'transcribed_audio.wav')
+    fs = FluidSynth(sound_font=SF2_PATH, sample_rate=SAMPLE_RATE)
+    fs.midi_to_audio(midi_file_path, midi_audio_path)
+    
+    print('\nThe transcribed audio is ready! ✅')
 
 
 def plot_midi(notes_sequence, save_png=False):
@@ -92,8 +105,9 @@ def plot_midi(notes_sequence, save_png=False):
     
 def save_plot_midi(plot_midi):
     '''TODO: write docstring'''
-    plot_midi_file = os.path.join(MIDI_PLOT_DIR, 'plot.png')
-    
+
+    midi_plot_path = os.path.join(BASE_DIR, 'outputs', 'midi_plot', 'plot.png')
+
     # Configure Chrome driver in headless mode
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
@@ -103,7 +117,7 @@ def save_plot_midi(plot_midi):
     driver = webdriver.Chrome(service=service, options=options)
 
     # Export the figure as a high-quality PNG
-    export_png(plot_midi, filename=plot_midi_file, webdriver=driver)
+    export_png(plot_midi, filename=midi_plot_path, webdriver=driver)
 
     # Close the Chrome driver
     driver.quit()
