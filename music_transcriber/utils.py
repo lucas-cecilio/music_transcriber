@@ -19,7 +19,7 @@ def process_audio(audio_file: str):
         print("\n❌ Format not supported, only .wav or .mp3.")
         return None
 
-    audio_path = os.path.join(BASE_DIR, 'input_audio', audio_file)
+    audio_path = os.path.join(UPLOAD_AUDIO_DIR, audio_file)
     print('\nProcessing audio 🔄')
     audio_processed, _ = librosa.load(audio_path, sr=SAMPLE_RATE)
     print('\nAudio Processed ✅')
@@ -72,6 +72,7 @@ def midi_to_audio():
 
 def plot_midi(notes_sequence, save_png=False):
     '''TODO: write docstring'''
+    
     print('\nCreating a MIDI plot 🔄')
     plot_midi = note_seq.plot_sequence(notes_sequence, show_figure=False)
     
@@ -104,7 +105,9 @@ def plot_midi(notes_sequence, save_png=False):
     
 def save_plot_midi(plot_midi):
     '''TODO: write docstring'''
+
     midi_plot_path = os.path.join(BASE_DIR, 'outputs', 'midi_plot', 'plot.png')
+
     # Configure Chrome driver in headless mode
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
