@@ -19,8 +19,8 @@ setup:
 	@echo "Starting setup 📥"
 	@python -m pip install --upgrade pip
 	@echo "Pip is now updated! 🎉"
-	@pip install -r requirements.txt
 	@cd mt3/ && pip install -e .
+	@pip install -r requirements.txt
 	@echo "Setup done! ✅"
 
 run:
