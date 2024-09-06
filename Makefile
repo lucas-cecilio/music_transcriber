@@ -19,14 +19,8 @@ setup:
 	@echo "Starting setup 📥"
 	@python -m pip install --upgrade pip
 	@echo "Pip is now updated! 🎉"
+	@pip install -r requirements.txt
 	@cd mt3/ && pip install -e .
-	@pip install pyfluidsynth
-	@pip install fastapi
-	@pip install python-multipart
-	@pip install uvicorn
-	@pip install selenium 
-	@pip install chromedriver-binary
-	@pip install webdriver-manager  
 	@echo "Setup done! ✅"
 
 run:
