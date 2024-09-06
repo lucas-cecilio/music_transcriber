@@ -1,26 +1,32 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
-import librosa
 import os
 import note_seq
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse
 from pathlib import Path
-from music_transcriber.inference_model import InferenceModel
+from music_transcriber.utils import process_audio, load_model, transcript_audio, download_midi, plot_midi
 
 app = FastAPI()
 
-# Instantiate the model
-MODEL = "ismir2021"
+# Global variables from utils.py
+SAMPLE_RATE = 16000
+AVAILABLE_MODELS = {
+    "piano": "ismir2021",
+    "multi-instrument": "mt3"
+}
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-checkpoint_path = os.path.join(BASE_DIR, 'music_transcriber/checkpoints', MODEL)
-#'/home/lucascecilio/code/lucas-cecilio/music_transcriber/checkpoints/ismir2021/'
-print(f'!!!!!!!!!!!!!!!!!!!!!!!!!!! {checkpoint_path}')
-inference_model = InferenceModel(checkpoint_path, MODEL)
+UPLOAD_DIR = Path(os.path.join(BASE_DIR, 'input_audio'))
+MIDI_DIR = Path(os.path.join(BASE_DIR, 'outputs/midi_file'))
+PLOT_DIR = Path(os.path.join(BASE_DIR, 'outputs/midi_plot'))
 
-UPLOAD_DIR = Path("./audio_files")
-MIDI_DIR = Path("./midi_files")
+# Endpoint to list available models
+@app.get("/available-models/")
+async def list_available_models():
+    """
+    Returns a list of available models and their descriptions.
+    """
+    return {"available_models": AVAILABLE_MODELS}
 
-
-#upload audio
+# Upload audio
 @app.post("/upload-audio/")
 async def upload_audio(file: UploadFile = File(...)):
     if not file.filename.endswith(('.wav', '.mp3')):
@@ -33,30 +39,56 @@ async def upload_audio(file: UploadFile = File(...)):
 
     return {"filename": file.filename, "filepath": str(file_location)}
 
-#transcribe audio
+# Transcribe audio with chosen model
 @app.post("/transcribe/")
-async def transcribe_audio(filename: str):
+async def transcribe_audio(filename: str, model_type: str = "piano"):
+    if model_type not in AVAILABLE_MODELS:
+        raise HTTPException(status_code=400, detail="Invalid model type. Choose from 'piano' or 'multi-instrument'.")
+
     file_location = UPLOAD_DIR / filename
     if not file_location.exists():
         raise HTTPException(status_code=404, detail="File not found.")
 
-    # Load audio file and run inference
-    raw_audio = librosa.load(file_location, sr=16000)
-    audio = raw_audio[0]
-    est_ns = inference_model(audio)
+    # Load the model based on user choice
+    selected_model = load_model(AVAILABLE_MODELS[model_type])
+
+    # Process audio
+    audio = process_audio(filename)
+    if audio is None:
+        raise HTTPException(status_code=400, detail="Audio processing failed.")
+
+    # Run inference
+    est_ns = transcript_audio(selected_model, audio)
 
     # Save the transcribed MIDI file
     midi_filename = filename.replace(".wav", ".mid")
     midi_filepath = MIDI_DIR / midi_filename
-    note_seq.sequence_proto_to_midi_file(est_ns, midi_filepath)
+    download_midi(est_ns)
 
     return {"midi_filename": midi_filename, "midi_filepath": str(midi_filepath)}
 
-#download MIDI file
+# Download MIDI file
 @app.get("/download-midi/")
-async def download_midi(midi_filename: str):
+async def download_midi_file(midi_filename: str):
     midi_filepath = MIDI_DIR / midi_filename
     if not midi_filepath.exists():
         raise HTTPException(status_code=404, detail="MIDI file not found.")
 
     return FileResponse(midi_filepath, media_type='audio/midi', filename=midi_filename)
+
+# Plot MIDI file
+@app.get("/plot-midi/")
+async def plot_midi_file(midi_filename: str, save_png: bool = False):
+    midi_filepath = MIDI_DIR / midi_filename
+    if not midi_filepath.exists():
+        raise HTTPException(status_code=404, detail="MIDI file not found.")
+
+    # Load and plot the MIDI file
+    est_ns = note_seq.midi_file_to_note_sequence(midi_filepath)
+    plot = plot_midi(est_ns, save_png=save_png)
+
+    if save_png:
+        plot_png_path = PLOT_DIR / 'plot.png'
+        return {"plot_png_path": str(plot_png_path)}
+
+    return {"message": "MIDI plot generated."}
