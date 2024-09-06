@@ -1,27 +1,18 @@
 import os
 import librosa
 import note_seq
-from utils import process_audio, load_model, transcript_audio, download_midi, plot_midi
+from utils import *
 from music_transcriber.params import *
 from inference_model import InferenceModel
 
-# # Global variables
-# SAMPLE_RATE = 16000
-# AVAILABLE_MODELS = {
-#     "piano": "ismir2021",
-#     "multi-instrument": "mt3"
-# }
-
-# # Get the absolute paths
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# SF2_PATH = os.path.join(BASE_DIR, 'mt3', 'SGM-v2.01-Sal-Guit-Bass-V1.3.sf2')
 
 def complete_transcribe(model_type, audio_file):
     '''TODO: Docstring'''
     audio_processed = process_audio(audio_file)
     model = load_model(model_type)
-    notes_sequence = transcript_audio(model, audio_processed)
+    notes_sequence = transcribe_audio(model, audio_processed)
     download_midi(notes_sequence)
+    midi_to_audio()
     plot_midi(notes_sequence, save_png=True)
 
 def complete_transcribe_terminal():
@@ -86,6 +77,6 @@ if __name__ == "__main__":
     # complete_transcribe_terminal()
     # process_audio('piano_chopin_5s.wav')
     # load_model('ismir2021')
-    # transcript_audio(load_model('ismir2021'), process_audio('piano_chopin_5s.wav'))
+    # transcribe_audio(load_model('ismir2021'), process_audio('piano_chopin_5s.wav'))
     # download_midi(transcript_audio(load_model('ismir2021'), process_audio('piano_chopin_5s.wav')))
     complete_transcribe('ismir2021', 'piano_chopin_5s.wav')
