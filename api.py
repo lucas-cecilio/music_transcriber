@@ -4,19 +4,13 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
 from music_transcriber.utils import process_audio, load_model, transcript_audio, download_midi, plot_midi
+from music_transcriber.params import *
 
 app = FastAPI()
 
-# Global variables from utils.py
-SAMPLE_RATE = 16000
-AVAILABLE_MODELS = {
-    "piano": "ismir2021",
-    "multi-instrument": "mt3"
-}
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-UPLOAD_DIR = Path(os.path.join(BASE_DIR, 'input_audio'))
-MIDI_DIR = Path(os.path.join(BASE_DIR, 'outputs/midi_file'))
-PLOT_DIR = Path(os.path.join(BASE_DIR, 'outputs/midi_plot'))
+UPLOAD_AUDIO_DIR = Path(os.path.join(BASE_DIR, 'input_audio'))
+MIDI_FILE_DIR = Path(os.path.join(BASE_DIR, 'outputs', 'midi_file'))
+MIDI_PLOT_DIR = Path(os.path.join(BASE_DIR, 'outputs', 'midi_plot'))
 
 # Endpoint to list available models
 @app.get("/available-models/")
@@ -33,7 +27,7 @@ async def upload_audio(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid file type.")
 
     # Saving uploaded file
-    file_location = UPLOAD_DIR / file.filename
+    file_location = UPLOAD_AUDIO_DIR / file.filename
     with open(file_location, "wb") as f:
         f.write(await file.read())
 
@@ -45,7 +39,7 @@ async def transcribe_audio(filename: str, model_type: str = "piano"):
     if model_type not in AVAILABLE_MODELS:
         raise HTTPException(status_code=400, detail="Invalid model type. Choose from 'piano' or 'multi-instrument'.")
 
-    file_location = UPLOAD_DIR / filename
+    file_location = UPLOAD_AUDIO_DIR / filename
     if not file_location.exists():
         raise HTTPException(status_code=404, detail="File not found.")
 
@@ -62,7 +56,7 @@ async def transcribe_audio(filename: str, model_type: str = "piano"):
 
     # Save the transcribed MIDI file
     midi_filename = filename.replace(".wav", ".mid")
-    midi_filepath = MIDI_DIR / midi_filename
+    midi_filepath = MIDI_FILE_DIR / midi_filename
     download_midi(est_ns)
 
     return {"midi_filename": midi_filename, "midi_filepath": str(midi_filepath)}
@@ -70,7 +64,7 @@ async def transcribe_audio(filename: str, model_type: str = "piano"):
 # Download MIDI file
 @app.get("/download-midi/")
 async def download_midi_file(midi_filename: str):
-    midi_filepath = MIDI_DIR / midi_filename
+    midi_filepath = MIDI_FILE_DIR / midi_filename
     if not midi_filepath.exists():
         raise HTTPException(status_code=404, detail="MIDI file not found.")
 
@@ -79,7 +73,7 @@ async def download_midi_file(midi_filename: str):
 # Plot MIDI file
 @app.get("/plot-midi/")
 async def plot_midi_file(midi_filename: str, save_png: bool = False):
-    midi_filepath = MIDI_DIR / midi_filename
+    midi_filepath = MIDI_FILE_DIR / midi_filename
     if not midi_filepath.exists():
         raise HTTPException(status_code=404, detail="MIDI file not found.")
 
@@ -88,7 +82,7 @@ async def plot_midi_file(midi_filename: str, save_png: bool = False):
     plot = plot_midi(est_ns, save_png=save_png)
 
     if save_png:
-        plot_png_path = PLOT_DIR / 'plot.png'
+        plot_png_path = MIDI_PLOT_DIR / 'plot.png'
         return {"plot_png_path": str(plot_png_path)}
 
     return {"message": "MIDI plot generated."}
