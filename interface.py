@@ -8,7 +8,7 @@ from midi2audio import FluidSynth
 API_URL = "http://127.0.0.1:8000"
 
 # Directories for file handling (same as in FastAPI)
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = Path(BASE_DIR, 'input_audio')
 MIDI_DIR = Path(BASE_DIR, 'outputs/midi_file')
 AUDIO_OUTPUT_DIR = Path(BASE_DIR, 'outputs/midi_audio')
