@@ -3,7 +3,7 @@ import note_seq
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
-from music_transcriber.utils import process_audio, load_model, transcript_audio, download_midi, plot_midi
+from music_transcriber.utils import process_audio, load_model, transcribe_audio, download_midi, plot_midi
 from music_transcriber.params import *
 
 app = FastAPI()
@@ -35,7 +35,7 @@ async def upload_audio(file: UploadFile = File(...)):
 
 # Transcribe audio with chosen model
 @app.post("/transcribe/")
-async def transcribe_audio(filename: str, model_type: str = "piano"):
+async def transcribe_audio_(filename: str, model_type: str = "piano"):
     if model_type not in AVAILABLE_MODELS:
         raise HTTPException(status_code=400, detail="Invalid model type. Choose from 'piano' or 'multi-instrument'.")
 
@@ -52,7 +52,7 @@ async def transcribe_audio(filename: str, model_type: str = "piano"):
         raise HTTPException(status_code=400, detail="Audio processing failed.")
 
     # Run inference
-    est_ns = transcript_audio(selected_model, audio)
+    est_ns = transcribe_audio(selected_model, audio)
 
     # Save the transcribed MIDI file
     midi_filename = filename.replace(".wav", ".mid")
