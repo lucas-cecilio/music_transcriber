@@ -3,7 +3,7 @@ import note_seq
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
-from music_transcriber.utils import process_audio, load_model, transcribe_audio, download_midi, plot_midi, midi_to_audio
+from music_transcriber.utils import process_audio, load_model, transcribe_audio, download_midi, plot_midi, midi_to_audio, midi_to_score
 from music_transcriber.params import *
 
 app = FastAPI()
@@ -60,14 +60,18 @@ async def transcribe(filename: str, model_type: str = "piano"):
     # Plot the notes sequence
     midi_plot_path, _ = plot_midi(notes_sequence, midi_file_name, save_png=True)
     
-    # Get the transcribed audio
+    # Generate and save the .wav of transcribed audio
     midi_audio_path = midi_to_audio(midi_file_name, midi_file_path)
+    
+    # Generate and save the .pdf of a music score
+    midi_score_pdf_path = midi_to_score(midi_file_name, midi_file_path)
 
     return {
         "midi_file_name": midi_file_name, 
         "midi_file_path": midi_file_path, 
         "midi_plot_path": midi_plot_path,
-        "midi_audio_path": midi_audio_path
+        "midi_audio_path": midi_audio_path,
+        "midi_score_path": midi_score_pdf_path
     }
 
 # Download MIDI file
@@ -78,20 +82,3 @@ async def download_midi_file(midi_file_name: str):
         raise HTTPException(status_code=404, detail="MIDI file not found.")
 
     return FileResponse(midi_file_path, media_type='audio/midi', filename=midi_file_name)
-
-# Plot MIDI file
-# @app.get("/plot-midi/")
-# async def plot_midi_file(midi_filename: str, save_png: bool = False):
-#     midi_filepath = MIDI_FILE_DIR / midi_filename
-#     if not midi_filepath.exists():
-#         raise HTTPException(status_code=404, detail="MIDI file not found.")
-
-#     # Load and plot the MIDI file
-#     est_ns = note_seq.midi_file_to_note_sequence(midi_filepath)
-#     plot = plot_midi(est_ns, save_png=save_png)
-
-#     if save_png:
-#         plot_png_path = MIDI_PLOT_DIR / 'plot.png'
-#         return {"plot_png_path": str(plot_png_path)}
-
-#     return {"message": "MIDI plot generated."}

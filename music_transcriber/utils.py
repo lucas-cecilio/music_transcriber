@@ -129,56 +129,50 @@ def midi_to_audio(midi_file_name: str, midi_file_path: str):
     
     return midi_audio_path
 
-def midi_to_score(midi_file_path: str):
+def midi_to_score(midi_file_name: str, midi_file_path: str):
     """ TODO: Docstring"""
     
     print('\nCreating a music score 🔄')
-    
-    # Define relative paths
-    midi_path = os.path.join("outputs", "midi_file", midi_filename)
-    output_xml_path = os.path.join("outputs", "midi_score", midi_filename.replace(".mid", ".xml"))
-    output_pdf_path = os.path.join("outputs", "midi_score", midi_filename.replace(".mid", ".pdf"))
 
-    # Check if the MIDI file exists
-    if not os.path.exists(midi_path):
-        raise FileNotFoundError(f"The file {midi_path} was not found.")
-
+    midi_score_name = str(Path(midi_file_name).stem).replace("_transcribed", "")
+    midi_score_xml_path = str(OUTPUT_MIDI_SCORE_PATH / Path(midi_file_name).with_suffix(".xml"))
+    midi_score_pdf_path = str(OUTPUT_MIDI_SCORE_PATH / Path(midi_file_name).with_suffix(".pdf"))
+  
     # Convert MIDI to MusicXML
-    subprocess.run(["mscore", midi_path, "-o", output_xml_path])
+    subprocess.run(["mscore", midi_file_path, "-o", midi_score_xml_path])
 
     # Edit the MusicXML file to add a title and subtitle
-    with open(output_xml_path, "r", encoding="utf-8") as xml_file:
+    with open(midi_score_xml_path, "r", encoding="utf-8") as xml_file:
         xml_data = xml_file.read()
-
-    # Title (based on the MIDI file name)
-    # title = midi_filename.replace(".mid", "")
 
     # Insert title and subtitle into the MusicXML in a more robust way
     if "<work-title>" in xml_data:
         # Replace existing <work-title> if found
         new_xml_data = xml_data.replace(
             "<work-title></work-title>",  # Insert the title where it's found empty
-            f"<work-title>Transcription made with Music Transcriber</work-title>"
+            f"<work-title>Transcription of {midi_score_name} made with Music Transcriber</work-title>"
         )
     else:
         # Insert title if not present, adding it after the opening <score-partwise> tag
         new_xml_data = xml_data.replace(
             "<score-partwise", 
-            f"<score-partwise>\n<work>\n<work-title>Transcription made with Music Transcriber</work-title></work>"
+            f"<score-partwise>\n<work>\n<work-title>Transcription of {midi_score_name} made with Music Transcriber</work-title></work>"
         )
 
     # Save the modified MusicXML temporarily
-    with open(output_xml_path, "w", encoding="utf-8") as xml_file:
+    with open(midi_score_xml_path, "w", encoding="utf-8") as xml_file:
         xml_file.write(new_xml_data)
 
     # Convert the modified MusicXML to PDF
-    subprocess.run(["mscore", output_xml_path, "-o", output_pdf_path])
+    subprocess.run(["mscore", midi_score_xml_path, "-o", midi_score_pdf_path])
 
     # Remove the temporary XML file
-    if os.path.exists(output_xml_path):
-        os.remove(output_xml_path)
+    if os.path.exists(midi_score_xml_path):
+        os.remove(midi_score_xml_path)
 
     print(f"Score successfully generated ✅")
+    
+    return midi_score_pdf_path
 
 
 
