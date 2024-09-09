@@ -2,9 +2,8 @@ import os
 import librosa
 import note_seq
 from utils import *
-from music_transcriber.params import *
+from params import *
 from inference_model import InferenceModel
-
 
 def complete_transcribe(model_type, audio_file):
     '''TODO: Docstring'''

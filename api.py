@@ -8,6 +8,7 @@ from music_transcriber.params import *
 
 app = FastAPI()
 
+INPUT_AUDIO_PATH = BASE_PATH / 'input_audio'
 # MIDI_FILE_DIR = Path(os.path.join(BASE_DIR, 'outputs', 'midi_file'))
 # MIDI_PLOT_DIR = Path(os.path.join(BASE_DIR, 'outputs', 'midi_plot'))
 
@@ -34,7 +35,8 @@ async def upload_audio(file: UploadFile = File(...)):
 
 # Transcribe audio with chosen model
 @app.post("/transcribe/")
-async def transcribe(filename: str, model_type: str = "piano"):
+async def transcribe(model_type: str = "piano"):
+    filename = os.listdir(INPUT_AUDIO_PATH)[0]
     if model_type not in AVAILABLE_MODELS:
         raise HTTPException(status_code=400, detail="Invalid model type. Choose from 'piano' or 'multi-instrument'.")
 
