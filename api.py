@@ -3,7 +3,7 @@ import note_seq
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
-from music_transcriber.utils import process_audio, load_model, transcribe_audio, download_midi, plot_midi
+from music_transcriber.utils import process_audio, load_model, transcribe_audio, download_midi, plot_midi, midi_to_audio
 from music_transcriber.params import *
 
 app = FastAPI()
@@ -43,7 +43,7 @@ async def transcribe(filename: str, model_type: str = "piano"):
         raise HTTPException(status_code=404, detail="File not found.")
 
      # Process audio
-    audio_processed = process_audio(filename)
+    audio_processed, audio_file_name = process_audio(filename)
     if audio_processed is None:
         raise HTTPException(status_code=400, detail="Audio processing failed.")
     
@@ -54,16 +54,20 @@ async def transcribe(filename: str, model_type: str = "piano"):
     notes_sequence = transcribe_audio(selected_model, audio_processed)
 
     # Save the transcribed MIDI file
-    midi_file_name = Path(filename).with_suffix(".mid")
-    midi_file_path = OUTPUT_MIDI_FILE_PATH / midi_file_name
-    download_midi(notes_sequence, midi_file_path)
+    midi_file_name, midi_file_path = download_midi(notes_sequence, audio_file_name)
     
     # Plot the notes sequence
-    midi_plot_name = midi_file_name.with_suffix(".png")
-    midi_plot_path = OUTPUT_MIDI_PLOT_PATH / midi_plot_name
-    plot_midi(notes_sequence, midi_plot_name, save_png=True)
+    midi_plot_path, _ = plot_midi(notes_sequence, midi_file_name, save_png=True)
+    
+    # Get the transcribed audio
+    midi_audio_path = midi_to_audio(midi_file_name, midi_file_path)
 
-    return {"midi_file_name": midi_file_name, "midi_file_path": str(midi_file_path), "midi_plot_path": str(midi_plot_path)}
+    return {
+        "midi_file_name": midi_file_name, 
+        "midi_file_path": midi_file_path, 
+        "midi_plot_path": midi_plot_path,
+        "midi_audio_path": midi_audio_path
+    }
 
 # Download MIDI file
 @app.get("/download-midi/")
