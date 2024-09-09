@@ -16,7 +16,6 @@ def complete_transcribe(model_type, audio_file):
     # midi_to_audio('transcribed.mid')
     # midi_to_score('transcribed.mid')
     
-    
 
 def complete_transcribe_terminal():
     # Model selection with validation

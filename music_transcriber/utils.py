@@ -117,7 +117,7 @@ def midi_to_audio(midi_filename: str):
     print('\nDownloading transcribed audio 🔄')
     
     midi_file_path = os.path.join(BASE_DIR, 'outputs', 'midi_file', midi_filename)
-    midi_audio_path = os.path.join(BASE_DIR, 'outputs', 'midi_audio', f'{midi_filename.replace(".mid", "")}_audio.wav')
+    midi_audio_path = os.path.join(BASE_DIR, 'outputs', 'midi_audio', 'transcribed_audio.wav')
     fs = FluidSynth(sound_font=SF2_PATH, sample_rate=SAMPLE_RATE)
     fs.midi_to_audio(midi_file_path, midi_audio_path)
     
