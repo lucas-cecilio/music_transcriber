@@ -7,13 +7,13 @@ from inference_model import InferenceModel
 
 def complete_transcribe(model_type, audio_file):
     '''TODO: Docstring'''
-    audio_processed = process_audio(audio_file)
+    audio_processed, audio_file_name = process_audio(audio_file)
     model = load_model(model_type)
     notes_sequence = transcribe_audio(model, audio_processed)
-    download_midi(notes_sequence, f'{audio_file.replace(".wav", ".mid")}')
-    plot_midi(notes_sequence, Path(audio_file).with_suffix(".png"), save_png=True)
-    # midi_to_audio('transcribed.mid')
-    # midi_to_score('transcribed.mid')
+    midi_file_name, midi_file_path = download_midi(notes_sequence, audio_file_name)
+    midi_plot_path, _ = plot_midi(notes_sequence, midi_file_name, save_png=True)
+    midi_audio_path = midi_to_audio(midi_file_name, midi_file_path)
+    # midi_to_score(midi_file_path)
     
 
 def complete_transcribe_terminal():
@@ -75,9 +75,4 @@ def complete_transcribe_terminal():
     print('\nThe midi file is ready! ✅')
 
 if __name__ == "__main__":
-    # complete_transcribe_terminal()
-    # process_audio('piano_chopin_5s.wav')
-    # load_model('ismir2021')
-    # transcribe_audio(load_model('ismir2021'), process_audio('piano_chopin_5s.wav'))
-    # download_midi(transcript_audio(load_model('ismir2021'), process_audio('piano_chopin_5s.wav')))
     complete_transcribe('ismir2021', 'piano_chopin_5s.wav')

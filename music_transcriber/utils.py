@@ -20,21 +20,21 @@ def process_audio(audio_file: str):
         print("\n❌ Format not supported, only .wav or .mp3.")
         return None
 
-    audio_path = INPUT_AUDIO_PATH / audio_file
+    audio_file_name = str(Path(audio_file).stem)
+    audio_file_path = INPUT_AUDIO_PATH / audio_file
     
     print('\nProcessing audio 🔄')
-    audio_processed, _ = librosa.load(audio_path, sr=SAMPLE_RATE)
+    audio_processed, _ = librosa.load(audio_file_path, sr=SAMPLE_RATE)
     print('\nAudio Processed ✅')
     
-    return audio_processed
+    return audio_processed, audio_file_name
 
 
 def load_model(model_type: str):
     ''' TODO: write docstring'''
 
-    checkpoint_model_path = os.path.join(CHECKPOINT_PATH, model_type)
     print('\nInitializing model 🔄')
-    
+    checkpoint_model_path = os.path.join(CHECKPOINT_PATH, model_type)
     model = InferenceModel(checkpoint_path=checkpoint_model_path, model_type=model_type)
     print('\nModel initialized ✅')
     
@@ -51,25 +51,28 @@ def transcribe_audio(model, audio_processed):
     return notes_sequence
 
 
-def download_midi(notes_sequence, midi_file_name):
+def download_midi(notes_sequence, audio_file_name):
     '''Saves the transcribed MIDI to a file.'''
     
-    midi_file_path = OUTPUT_MIDI_FILE_PATH / midi_file_name
-    
     print('\nDownloading midi 🔄')
+    midi_file_name = str(Path(audio_file_name).stem) + '_transcribed.mid'
+    midi_file_path = str(OUTPUT_MIDI_FILE_PATH / midi_file_name)
     note_seq.sequence_proto_to_midi_file(notes_sequence, midi_file_path)
     
     print('\nThe midi file is ready! ✅')
+    return midi_file_name, midi_file_path
     
-def plot_midi(notes_sequence, midi_plot_name, save_png=True):
+def plot_midi(notes_sequence, midi_file_name, save_png=True):
     '''TODO: write docstring'''
     
     print('\nCreating a MIDI plot 🔄')
-    plot_midi = note_seq.plot_sequence(notes_sequence, show_figure=False)
-    midi_plot_path = OUTPUT_MIDI_PLOT_PATH / midi_plot_name
+    midi_plot_name = str(Path(midi_file_name).with_suffix(".png"))
+    midi_plot_path = str(OUTPUT_MIDI_PLOT_PATH / midi_plot_name)
     
+    plot_midi = note_seq.plot_sequence(notes_sequence, show_figure=False)
+ 
     # Add and adjust title
-    plot_midi.title.text = f'MIDI sequence of {str(midi_plot_name).replace(".png", "")}'
+    plot_midi.title.text = f'MIDI sequence of {midi_plot_name.replace(".png", "")}'
     plot_midi.title.text_font_size = "20pt"
     plot_midi.title.align = "center"
     
@@ -93,7 +96,7 @@ def plot_midi(notes_sequence, midi_plot_name, save_png=True):
         save_plot_midi(plot_midi, midi_plot_path)
         
     print('\nMIDI plot done ✅')
-    return plot_midi
+    return midi_plot_path, plot_midi
     
 def save_plot_midi(plot_midi, midi_plot_path):
     '''TODO: write docstring'''
@@ -112,18 +115,21 @@ def save_plot_midi(plot_midi, midi_plot_path):
     # Close the Chrome driver
     driver.quit()
 
-def midi_to_audio(midi_filename: str):
+def midi_to_audio(midi_file_name: str, midi_file_path: str):
     '''TODO: Write docstring'''
     print('\nDownloading transcribed audio 🔄')
     
-    midi_file_path = os.path.join(BASE_DIR, 'outputs', 'midi_file', midi_filename)
-    midi_audio_path = os.path.join(BASE_DIR, 'outputs', 'midi_audio', 'transcribed_audio.wav')
+    midi_audio_name = str(Path(midi_file_name).with_suffix(".wav"))
+    midi_audio_path = str(OUTPUT_MIDI_AUDIO_PATH / midi_audio_name)
+    
     fs = FluidSynth(sound_font=SF2_PATH, sample_rate=SAMPLE_RATE)
     fs.midi_to_audio(midi_file_path, midi_audio_path)
     
     print('\nThe transcribed audio is ready! ✅')
+    
+    return midi_audio_path
 
-def midi_to_score(midi_filename: str):
+def midi_to_score(midi_file_path: str):
     """ TODO: Docstring"""
     
     print('\nCreating a music score 🔄')
