@@ -1,6 +1,7 @@
 import os
 import librosa
 import note_seq
+import subprocess
 
 from midi2audio import FluidSynth
 from selenium import webdriver
@@ -58,16 +59,68 @@ def download_midi(notes_sequence):
     
     print('\nThe midi file is ready! ✅')
 
-def midi_to_audio():
+def midi_to_audio(midi_filename: str):
     '''TODO: Write docstring'''
     print('\nDownloading transcribed audio 🔄')
     
-    midi_file_path = os.path.join(BASE_DIR, 'outputs', 'midi_file', 'transcribed.mid')
-    midi_audio_path = os.path.join(BASE_DIR, 'outputs', 'midi_audio', 'transcribed_audio.wav')
+    midi_file_path = os.path.join(BASE_DIR, 'outputs', 'midi_file', midi_filename)
+    midi_audio_path = os.path.join(BASE_DIR, 'outputs', 'midi_audio', f'{midi_filename.replace(".mid", "")}_audio.wav')
     fs = FluidSynth(sound_font=SF2_PATH, sample_rate=SAMPLE_RATE)
     fs.midi_to_audio(midi_file_path, midi_audio_path)
     
     print('\nThe transcribed audio is ready! ✅')
+
+def midi_to_score(midi_filename: str):
+    """ TODO: Docstring"""
+    
+    print('\nCreating a music score 🔄')
+    
+    # Define relative paths
+    midi_path = os.path.join("outputs", "midi_file", midi_filename)
+    output_xml_path = os.path.join("outputs", "midi_score", midi_filename.replace(".mid", ".xml"))
+    output_pdf_path = os.path.join("outputs", "midi_score", midi_filename.replace(".mid", ".pdf"))
+
+    # Check if the MIDI file exists
+    if not os.path.exists(midi_path):
+        raise FileNotFoundError(f"The file {midi_path} was not found.")
+
+    # Convert MIDI to MusicXML
+    subprocess.run(["mscore", midi_path, "-o", output_xml_path])
+
+    # Edit the MusicXML file to add a title and subtitle
+    with open(output_xml_path, "r", encoding="utf-8") as xml_file:
+        xml_data = xml_file.read()
+
+    # Title (based on the MIDI file name)
+    # title = midi_filename.replace(".mid", "")
+
+    # Insert title and subtitle into the MusicXML in a more robust way
+    if "<work-title>" in xml_data:
+        # Replace existing <work-title> if found
+        new_xml_data = xml_data.replace(
+            "<work-title></work-title>",  # Insert the title where it's found empty
+            f"<work-title>Transcription made with Music Transcriber</work-title>"
+        )
+    else:
+        # Insert title if not present, adding it after the opening <score-partwise> tag
+        new_xml_data = xml_data.replace(
+            "<score-partwise", 
+            f"<score-partwise>\n<work>\n<work-title>Transcription made with Music Transcriber</work-title></work>"
+        )
+
+    # Save the modified MusicXML temporarily
+    with open(output_xml_path, "w", encoding="utf-8") as xml_file:
+        xml_file.write(new_xml_data)
+
+    # Convert the modified MusicXML to PDF
+    subprocess.run(["mscore", output_xml_path, "-o", output_pdf_path])
+
+    # Remove the temporary XML file
+    if os.path.exists(output_xml_path):
+        os.remove(output_xml_path)
+
+    print(f"Score successfully generated ✅")
+
 
 
 def plot_midi(notes_sequence, save_png=False):
@@ -121,3 +174,4 @@ def save_plot_midi(plot_midi):
 
     # Close the Chrome driver
     driver.quit()
+    
