@@ -1,4 +1,5 @@
 pyfluidsynth
+midi2audio
 fastapi
 python-multipart
 uvicorn

@@ -22,6 +22,7 @@ setup:
 	@echo "Pip is now updated! 🎉"
 	@cd mt3/ && pip install -e .
 	@pip install -r requirements.txt
+	@pip install .
 	@echo "Setup done! ✅"
 
 local:
