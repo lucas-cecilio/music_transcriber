@@ -24,11 +24,14 @@ setup:
 	@pip install -r requirements.txt
 	@echo "Setup done! ✅"
 
-run:
+local:
 	@python music_transcriber/main_local.py
 
-run_api:
+api:
 	@uvicorn api:app --reload --loop asyncio
+
+streamlint:
+	@streamlit run interface.py
 
 install_all:
 	@make mt3

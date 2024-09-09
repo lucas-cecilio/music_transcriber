@@ -11,10 +11,10 @@ def complete_transcribe(model_type, audio_file):
     audio_processed = process_audio(audio_file)
     model = load_model(model_type)
     notes_sequence = transcribe_audio(model, audio_processed)
-    download_midi(notes_sequence)
-    midi_to_audio('transcribed.mid')
-    midi_to_score('transcribed.mid')
-    # plot_midi(notes_sequence, save_png=True)
+    download_midi(notes_sequence, f'{audio_file.replace(".wav", ".mid")}')
+    plot_midi(notes_sequence, Path(audio_file).with_suffix(".png"), save_png=True)
+    # midi_to_audio('transcribed.mid')
+    # midi_to_score('transcribed.mid')
     
 
 def complete_transcribe_terminal():
@@ -53,14 +53,14 @@ def complete_transcribe_terminal():
         audio_file_name = input().strip().lower()
     
     # Load audio
-    audio_path = os.path.join(BASE_DIR, 'input_audio', audio_file_name)
+    audio_path = os.path.join(BASE_PATH, 'input_audio', audio_file_name)
     print('\nLoading audio 🔄')
     audio, _ = librosa.load(audio_path, sr=SAMPLE_RATE)
     print('\nAudio loaded ✅')
     
     # Initialize model
     print('\nInitializing model 🔄')
-    CHECKPOINT_PATH = os.path.join(BASE_DIR, 'checkpoints', model_type)
+    CHECKPOINT_PATH = os.path.join(BASE_PATH, 'checkpoints', model_type)
     model = InferenceModel(CHECKPOINT_PATH, model_type=model_type)
     print('\nModel initialized ✅')
 
@@ -71,7 +71,7 @@ def complete_transcribe_terminal():
 
     # Save midi file
     print('\nDownloading midi 🔄')
-    midi_output_path = os.path.join(BASE_DIR, 'outputs/midi_file', 'transcribed.mid')
+    midi_output_path = os.path.join(BASE_PATH, 'outputs/midi_file', 'transcribed.mid')
     note_seq.sequence_proto_to_midi_file(est_ns, midi_output_path)
     print('\nThe midi file is ready! ✅')
 
