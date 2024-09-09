@@ -8,11 +8,11 @@ from inference_model import InferenceModel
 
 def complete_transcribe(model_type, audio_file):
     '''TODO: Docstring'''
-    # audio_processed = process_audio(audio_file)
-    # model = load_model(model_type)
-    # notes_sequence = transcribe_audio(model, audio_processed)
-    # download_midi(notes_sequence)
-    # midi_to_audio('transcribed.mid')
+    audio_processed = process_audio(audio_file)
+    model = load_model(model_type)
+    notes_sequence = transcribe_audio(model, audio_processed)
+    download_midi(notes_sequence)
+    midi_to_audio('transcribed.mid')
     midi_to_score('transcribed.mid')
     # plot_midi(notes_sequence, save_png=True)
     
