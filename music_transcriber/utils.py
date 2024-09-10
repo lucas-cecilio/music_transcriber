@@ -139,7 +139,7 @@ def midi_to_score(midi_file_name: str, midi_file_path: str):
     midi_score_pdf_path = str(OUTPUT_MIDI_SCORE_PATH / Path(midi_file_name).with_suffix(".pdf"))
   
     # Convert MIDI to MusicXML
-    subprocess.run(["mscore", midi_file_path, "-o", midi_score_xml_path])
+    subprocess.run(["musescore", midi_file_path, "-o", midi_score_xml_path])
 
     # Edit the MusicXML file to add a title and subtitle
     with open(midi_score_xml_path, "r", encoding="utf-8") as xml_file:
@@ -164,7 +164,7 @@ def midi_to_score(midi_file_name: str, midi_file_path: str):
         xml_file.write(new_xml_data)
 
     # Convert the modified MusicXML to PDF
-    subprocess.run(["mscore", midi_score_xml_path, "-o", midi_score_pdf_path])
+    subprocess.run(["musescore", midi_score_xml_path, "-o", midi_score_pdf_path])
 
     # Remove the temporary XML file
     if os.path.exists(midi_score_xml_path):
