@@ -1,5 +1,5 @@
 apt:
-	@sudo apt update 
+	@sudo apt update
 	@sudo apt install libfluidsynth3 fluidsynth build-essential libasound2-dev libjack-dev gdal-bin libgdal-dev libcairo2-dev pkg-config python3-dev musescore
 	@echo "Packages installed! 🎉"
 
@@ -26,8 +26,7 @@ setup:
 	@echo "Setup done! ✅"
 
 docker_run:
-	@docker run --env-file .env -p 8080:8000 music_transcriber
-	@echo "Don't forget http://localhost:8080/docs"
+	@docker run -it -e PORT=8000 -p 8000:8000 --env-file .env ${CONTAINER}:dev
 
 local:
 	@python music_transcriber/main_local.py
@@ -35,7 +34,7 @@ local:
 api:
 	@uvicorn api:app --reload --loop asyncio
 
-streamlint:
+streamlit:
 	@streamlit run interface.py
 
 install_all:
