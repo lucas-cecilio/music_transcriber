@@ -1,112 +1,110 @@
 import streamlit as st
 import requests
-from pathlib import Path
-import os
-from midi2audio import FluidSynth
+import base64
+import json
+from bokeh.embed import json_item
 
-# Define the API URL
+# Set the API URL
 API_URL = "http://127.0.0.1:8000"
 
-# Directories for file handling (same as in FastAPI)
-BASE_DIR = Path(__file__).resolve().parent
-UPLOAD_DIR = Path(BASE_DIR, 'input_audio')
-MIDI_DIR = Path(BASE_DIR, 'outputs/midi_file')
-AUDIO_OUTPUT_DIR = Path(BASE_DIR, 'outputs/midi_audio')
+# Title of the website
+st.title("Music Transcription with Transformers")
 
-def upload_file(file):
-    """Upload an audio file to the FastAPI backend."""
-    files = {"file": (file.name, file, file.type)}
-    response = requests.post(f"{API_URL}/upload-audio/", files=files)
-    return response
+# How to use it
+st.markdown("""
+### How to use it:
+This site is an interactive demo of a few music transcription models created by our team. 
+You can upload audio and have one of our models automatically transcribe it.
 
-def transcribe_audio(filename, model_type):
-    """Trigger the transcription process via the FastAPI backend."""
-    response = requests.post(f"{API_URL}/transcribe/", json={"filename": filename, "model_type": model_type})
-    return response
+**Instructions:**
+1. In the Load Model cell, choose either `piano` for piano transcription or `multi-instrument` for multi-instrument transcription.
+2. In the Upload Audio cell, choose an MP3 or WAV file from your computer when prompted.
+3. Transcribe the audio using the Transcribe Audio cell (it may take a few minutes depending on the length of the audio).
+""")
 
-def download_midi(filename):
-    """Download the transcribed MIDI file."""
-    response = requests.get(f"{API_URL}/download-midi/", params={"midi_filename": filename})
-    midi_path = MIDI_DIR / filename
-    with open(midi_path, "wb") as f:
-        f.write(response.content)
-    return midi_path
+# Choose between two models
+model_type = st.selectbox("Choose a model", ["piano", "multi-instrument"])
 
-def convert_midi_to_wav(midi_path, output_path):
-    """Convert MIDI to WAV using FluidSynth."""
-    fs = FluidSynth()
-    fs.midi_to_audio(str(midi_path), str(output_path))
+# # Map the user-friendly names to the actual model types
+# model_type_mapping = {
+#     "piano": "ismir2021",
+#     "multi-instrument": "mt3"
+# }
 
-# Streamlit UI
-st.title("Music Transcription App")
-st.write("Upload an MP3 or WAV file to transcribe it to MIDI.")
-
-# Model selection dropdown
-model_type = st.selectbox(
-    "Choose the transcription model:",
-    ("mt3 (all instruments)", "ismir2021 (piano only)")
-)
-
-# Map the user-friendly names to the model identifiers expected by the API
-model_map = {
-    "mt3 (all instruments)": "multi-instrument",
-    "ismir2021 (piano only)": "piano"
-}
-
-# Upload audio file
-uploaded_file = st.file_uploader("Choose an audio file...", type=["mp3", "wav"])
+# Upload audio
+uploaded_file = st.file_uploader("Upload your audio file (.mp3 or .wav)", type=["mp3", "wav"])
 
 if uploaded_file is not None:
-    # Save the uploaded file to disk
-    file_path = UPLOAD_DIR / uploaded_file.name
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+    # Immediately play the uploaded audio file
+    st.audio(uploaded_file, format="audio/mp3")
 
-    # Play the audio
-    st.write("Playing the uploaded audio file:")
-    st.audio(str(file_path))  # Convert Path to string
-
-    # Upload the file to the FastAPI server
-    st.write("Uploading file...")
-    upload_response = upload_file(uploaded_file)
-
+    # Convert uploaded file to the path in the directory and send to API
+    files = {"file": (uploaded_file.name, uploaded_file.getvalue())}
+    upload_response = requests.post(f"{API_URL}/upload-audio/", files=files)
+    # st.write(upload_response)
+    
     if upload_response.status_code == 200:
-        st.write(f"File uploaded successfully: {upload_response.json()['filename']}")
+        st.success("Audio file uploaded successfully!")
+        file_data = upload_response.json()
+        filename = file_data["filename"]
 
-        # Run transcription using the selected model
-        selected_model = model_map[model_type]
-        st.write(f"Transcribing the audio file using the {selected_model} model...")
-        transcribe_response = transcribe_audio(upload_response.json()['filename'], selected_model)
+        # Display the "Transcribe" button
+        if st.button("Transcribe"):
+            with st.spinner('Transcribing...'):
+                # Initialize progress bar
+                progress_bar = st.progress(0)
 
-        if transcribe_response.status_code == 200:
-            midi_filename = transcribe_response.json()['midi_filename']
-            st.write(f"Transcription successful! MIDI file generated: {midi_filename}")
+                # Step 2: Transcribe the audio (50% progress)
+                transcribe_payload = {"filename": filename, "model_type": model_type}
+                # st.write(transcribe_payload)
+                # st.write(type(transcribe_payload['filename']))
+                # st.write(type(transcribe_payload['model_type']))
+                
+                # http://127.0.0.1:8000/transcribe/?filename=piano_chopin_5s.wav&model_type=piano
+                # transcribe_response = requests.get(f"{API_URL}/transcribe/", json=transcribe_payload)
+  
+                transcribe_response = requests.get(f"{API_URL}/transcribe/?filename={filename}&model_type={model_type}&response_type=binary")
+                st.write(transcribe_response)
+                
+                progress_bar.progress(50)
 
-            # Download the MIDI file
-            st.write("Downloading the MIDI file...")
-            midi_path = download_midi(midi_filename)
+                if transcribe_response.status_code == 200:
+                    transcription_data = transcribe_response.json()
+                    progress_bar.progress(75)
 
-            # Convert MIDI to WAV
-            wav_filename = midi_filename.replace(".mid", ".wav")
-            wav_path = AUDIO_OUTPUT_DIR / wav_filename
-            st.write("Converting MIDI to WAV...")
-            convert_midi_to_wav(midi_path, wav_path)
+                    # Decode the Base64 encoded data
+                    midi_file = base64.b64decode(transcription_data["midi_file_base64"])
+                    midi_audio = base64.b64decode(transcription_data["midi_audio_base64"])
+                    midi_score_pdf = base64.b64decode(transcription_data["midi_score_pdf_base64"])
+                    midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
+                    
+                    # midi_file = transcription_data["midi_file_path"]
+                    # midi_audio = transcription_data["midi_audio_path"]
+                    # midi_score_pdf = transcription_data["midi_score_path"]
+                    # midi_plot = transcription_data["midi_plot_path"]
 
-            # Play the converted WAV file
-            st.write("Playing the transcribed WAV file:")
-            st.audio(str(wav_path))  # Convert Path to string
+                    # Show Bokeh plot
+                    # bokeh_plot_json = transcription_data["bokeh_plot_json"]
+                    # if bokeh_plot_json:
+                    #     st.bokeh_chart(json_item(bokeh_plot_json))
+                    # else:
+                    #     st.error("Failed to load Bokeh plot.")
 
-            # Provide a download link for the MIDI file
-            with open(midi_path, "rb") as midi_file:
-                st.download_button(
-                    label="Download MIDI",
-                    data=midi_file.read(),
-                    file_name=midi_filename,
-                    mime="audio/midi"
-                )
+                    # Play transcribed audio
+                    st.audio(midi_audio, format="audio/wav")
 
-            st.write("MIDI file ready for download!")
-        else:
-            st.write("Transcription failed. Please try again.")
+                    # Generate and display Music Score
+                    st.image(midi_plot, caption=f"Music Score for {filename}")
+
+                    # Download buttons
+                    st.download_button(label="Download Score", data=midi_score_pdf)
+                    st.download_button(label="Download MIDI File", data=midi_file)
+
+                    progress_bar.progress(100)
+                else:
+                    st.error("Transcription failed!")
     else:
-        st.write("File upload failed. Please try again.")
+        st.error("Failed to upload audio file.")
+
+# Add the GitHub link and sources button
+st.markdown("[GitHub Project](https://github.com/lucas-cecilio/music_transcriber)")

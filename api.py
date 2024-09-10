@@ -1,10 +1,15 @@
+import base64
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse #, FileResponse
 from bokeh.embed import json_item
 from music_transcriber.utils import *
 from music_transcriber.params import *
 
 app = FastAPI()
+
+def encode_file_to_base64(file_path):
+    with open(file_path, "rb") as file:
+        return base64.b64encode(file.read()).decode('utf-8')
 
 # Endpoint to list available models
 @app.get("/available-models/")
@@ -28,8 +33,8 @@ async def upload_audio(file: UploadFile = File(...)):
     return {"filename": file.filename, "filepath": str(file_location)}
 
 # Transcribe audio with chosen model
-@app.post("/transcribe/")
-async def transcribe(filename: str, model_type: str = "piano"):
+@app.get("/transcribe/")
+async def transcribe(filename: str, model_type: str = "piano", response_type: str = "binary"):
     if model_type not in AVAILABLE_MODELS:
         raise HTTPException(status_code=400, detail="Invalid model type. Choose from 'piano' or 'multi-instrument'.")
 
@@ -60,21 +65,38 @@ async def transcribe(filename: str, model_type: str = "piano"):
     # Plot the notes sequence
     midi_plot_path, bokeh_plot = plot_midi(notes_sequence, midi_file_name, save_png=True)
     bokeh_plot_json = json_item(bokeh_plot)
+    
+    if response_type == "path":
+        return {
+            "midi_file_name": midi_file_name, 
+            "midi_file_path": midi_file_path, 
+            "midi_audio_path": midi_audio_path,
+            "midi_score_path": midi_score_pdf_path,
+            "midi_plot_path": midi_plot_path,
+            "bokeh_plot_json": bokeh_plot_json
+        }
 
-    return {
-        "midi_file_name": midi_file_name, 
-        "midi_file_path": midi_file_path, 
-        "midi_audio_path": midi_audio_path,
-        "midi_score_path": midi_score_pdf_path,
-        "midi_plot_path": midi_plot_path,
+    # Encode files to base64
+    midi_file_base64 = encode_file_to_base64(midi_file_path)
+    midi_audio_base64 = encode_file_to_base64(midi_audio_path)
+    midi_score_pdf_base64 = encode_file_to_base64(midi_score_pdf_path)
+    midi_plot_base64 = encode_file_to_base64(midi_plot_path)
+    
+    return JSONResponse(content={
+        "midi_file_name": midi_file_name,
+        "midi_file_base64": midi_file_base64,
+        "midi_audio_base64": midi_audio_base64,
+        "midi_score_pdf_base64": midi_score_pdf_base64,
+        "midi_plot_base64": midi_plot_base64,
         "bokeh_plot_json": bokeh_plot_json
-    }
+    })
+    
+   
+# # Download MIDI file
+# @app.get("/download-midi/")
+# async def download_midi_file(midi_file_name: str):
+#     midi_file_path = OUTPUT_MIDI_FILE_PATH / midi_file_name
+#     if not midi_file_path.exists():
+#         raise HTTPException(status_code=404, detail="MIDI file not found.")
 
-# Download MIDI file
-@app.get("/download-midi/")
-async def download_midi_file(midi_file_name: str):
-    midi_file_path = OUTPUT_MIDI_FILE_PATH / midi_file_name
-    if not midi_file_path.exists():
-        raise HTTPException(status_code=404, detail="MIDI file not found.")
-
-    return FileResponse(midi_file_path, media_type='audio/midi', filename=midi_file_name)
+#     return FileResponse(midi_file_path, media_type='audio/midi', filename=midi_file_name)
