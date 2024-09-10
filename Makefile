@@ -22,8 +22,12 @@ setup:
 	@echo "Pip is now updated! 🎉"
 	@cd mt3/ && pip install -e .
 	@pip install -r requirements.txt
-	@pip install .
+	@pip install -e .
 	@echo "Setup done! ✅"
+
+docker_run:
+	@docker run --env-file .env -p 8080:8000 music_transcriber
+	@echo "Don't forget http://localhost:8080/docs"
 
 local:
 	@python music_transcriber/main_local.py
