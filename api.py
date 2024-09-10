@@ -1,16 +1,10 @@
-import os
-import note_seq
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
-from music_transcriber.utils import process_audio, load_model, transcribe_audio, download_midi, plot_midi, midi_to_audio, midi_to_score
+from bokeh.embed import json_item
+from music_transcriber.utils import *
 from music_transcriber.params import *
 
 app = FastAPI()
-
-INPUT_AUDIO_PATH = BASE_PATH / 'input_audio'
-# MIDI_FILE_DIR = Path(os.path.join(BASE_DIR, 'outputs', 'midi_file'))
-# MIDI_PLOT_DIR = Path(os.path.join(BASE_DIR, 'outputs', 'midi_plot'))
 
 # Endpoint to list available models
 @app.get("/available-models/")
@@ -57,21 +51,23 @@ async def transcribe(filename: str, model_type: str = "piano"):
     # Save the transcribed MIDI file
     midi_file_name, midi_file_path = download_midi(notes_sequence, audio_file_name)
     
-    # Plot the notes sequence
-    midi_plot_path, _ = plot_midi(notes_sequence, midi_file_name, save_png=True)
-    
     # Generate and save the .wav of transcribed audio
     midi_audio_path = midi_to_audio(midi_file_name, midi_file_path)
     
     # Generate and save the .pdf of a music score
     midi_score_pdf_path = midi_to_score(midi_file_name, midi_file_path)
+    
+    # Plot the notes sequence
+    midi_plot_path, bokeh_plot = plot_midi(notes_sequence, midi_file_name, save_png=True)
+    bokeh_plot_json = json_item(bokeh_plot)
 
     return {
         "midi_file_name": midi_file_name, 
         "midi_file_path": midi_file_path, 
-        "midi_plot_path": midi_plot_path,
         "midi_audio_path": midi_audio_path,
-        "midi_score_path": midi_score_pdf_path
+        "midi_score_path": midi_score_pdf_path,
+        "midi_plot_path": midi_plot_path,
+        "bokeh_plot_json": bokeh_plot_json
     }
 
 # Download MIDI file
