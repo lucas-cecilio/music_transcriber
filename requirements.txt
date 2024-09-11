@@ -2,6 +2,7 @@ pyfluidsynth
 midi2audio
 fastapi
 python-multipart
+streamlit
 uvicorn
 selenium 
 chromedriver-binary
