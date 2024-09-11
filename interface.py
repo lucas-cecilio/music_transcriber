@@ -3,11 +3,9 @@ import requests
 import base64
 from pathlib import Path
 
-from bokeh.embed import file_html
-from bokeh.embed import json_item
-from bokeh.resources import CDN
-from bokeh.plotting import show
-import streamlit.components.v1 as components
+import pandas as pd
+import matplotlib.pyplot as plt
+from music_transcriber.plots import plot_notes_seq
 
 st.set_page_config(
             page_title="Music Transcriber", # => Quick reference - Streamlit
@@ -100,17 +98,19 @@ if "transcription_data" in st.session_state and st.session_state.transcription_d
         midi_file = base64.b64decode(transcription_data["midi_file_base64"])
         midi_audio = base64.b64decode(transcription_data["midi_audio_base64"])
         midi_score_pdf = base64.b64decode(transcription_data["midi_score_base64"])
-        midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
+        # midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
 
     if response_type == 'path':
         midi_file = transcription_data["midi_file_path"]
         midi_audio = transcription_data["midi_audio_path"]
         midi_score_pdf = transcription_data["midi_score_path"]
-        midi_plot = transcription_data["midi_plot_path"]
+        # midi_plot = transcription_data["midi_plot_path"]
 
     # Generate and display Music Score
     st.write("")
-    st.image(midi_plot)
+    df_notes = pd.DataFrame(transcription_data["notes_dict"])
+    st.pyplot(plot_notes_seq(df_notes))
+    st.write("")
     
     # # Check if there is a Bokeh plot available and render it
     # if "bokeh_plot_json" in transcription_data:

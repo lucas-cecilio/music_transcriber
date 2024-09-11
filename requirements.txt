@@ -7,6 +7,5 @@ uvicorn
 note-seq
 bokeh
 librosa
-selenium 
-chromedriver-binary
-webdriver-manager  
+matplotlib
+pandas

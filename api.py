@@ -62,41 +62,32 @@ async def transcribe(filename: str, model_type: str = "piano", response_type: st
     # Generate and save the .pdf of a music score
     midi_score_path = midi_to_score(midi_file_name, midi_file_path)
     
+    # Generate a dataframe of notes sequence
+    notes_dict = sequence_to_dict(notes_sequence)
+    
     # Plot the notes sequence
-    midi_plot_path, bokeh_plot = plot_midi(notes_sequence, midi_file_name, save_png=True)
-    bokeh_plot_json = json_item(bokeh_plot)
+    # midi_plot_path, bokeh_plot = plot_midi(notes_sequence, midi_file_name, save_png=True)
+    # bokeh_plot_json = json_item(bokeh_plot)
     
     if response_type == "path":
         return {
+            "notes_dict": notes_dict,
             "midi_file_name": midi_file_name, 
             "midi_file_path": midi_file_path, 
             "midi_audio_path": midi_audio_path,
-            "midi_score_path": midi_score_path,
-            "midi_plot_path": midi_plot_path,
-            "bokeh_plot_json": bokeh_plot_json
+            "midi_score_path": midi_score_path
         }
 
     # Encode files to base64
     midi_file_base64 = encode_file_to_base64(midi_file_path)
     midi_audio_base64 = encode_file_to_base64(midi_audio_path)
     midi_score_base64 = encode_file_to_base64(midi_score_path)
-    midi_plot_base64 = encode_file_to_base64(midi_plot_path)
+
     
     return JSONResponse(content={
+        "notes_dict": notes_dict,
         "midi_file_name": midi_file_name,
         "midi_file_base64": midi_file_base64,
         "midi_audio_base64": midi_audio_base64,
-        "midi_score_base64": midi_score_base64,
-        "midi_plot_base64": midi_plot_base64,
-        "bokeh_plot_json": bokeh_plot_json
+        "midi_score_base64": midi_score_base64
     })
-    
-   
-# # Download MIDI file
-# @app.get("/download-midi/")
-# async def download_midi_file(midi_file_name: str):
-#     midi_file_path = OUTPUT_MIDI_FILE_PATH / midi_file_name
-#     if not midi_file_path.exists():
-#         raise HTTPException(status_code=404, detail="MIDI file not found.")
-
-#     return FileResponse(midi_file_path, media_type='audio/midi', filename=midi_file_name)
