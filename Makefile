@@ -25,13 +25,16 @@ setup:
 	@pip install -e .
 	@echo "Setup done! ✅"
 
+docker_run:
+	@docker run -it -e PORT=8000 -p 8000:8000 --env-file .env ${CONTAINER}:dev
+
 local:
 	@python music_transcriber/main_local.py
 
 api:
 	@uvicorn api:app --reload --loop asyncio
 
-streamlint:
+streamlit:
 	@streamlit run interface.py
 
 install_all:
