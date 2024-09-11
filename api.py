@@ -60,7 +60,7 @@ async def transcribe(filename: str, model_type: str = "piano", response_type: st
     midi_audio_path = midi_to_audio(midi_file_name, midi_file_path)
     
     # Generate and save the .pdf of a music score
-    midi_score_pdf_path = midi_to_score(midi_file_name, midi_file_path)
+    midi_score_path = midi_to_score(midi_file_name, midi_file_path)
     
     # Plot the notes sequence
     midi_plot_path, bokeh_plot = plot_midi(notes_sequence, midi_file_name, save_png=True)
@@ -71,7 +71,7 @@ async def transcribe(filename: str, model_type: str = "piano", response_type: st
             "midi_file_name": midi_file_name, 
             "midi_file_path": midi_file_path, 
             "midi_audio_path": midi_audio_path,
-            "midi_score_path": midi_score_pdf_path,
+            "midi_score_path": midi_score_path,
             "midi_plot_path": midi_plot_path,
             "bokeh_plot_json": bokeh_plot_json
         }
@@ -79,14 +79,14 @@ async def transcribe(filename: str, model_type: str = "piano", response_type: st
     # Encode files to base64
     midi_file_base64 = encode_file_to_base64(midi_file_path)
     midi_audio_base64 = encode_file_to_base64(midi_audio_path)
-    midi_score_pdf_base64 = encode_file_to_base64(midi_score_pdf_path)
+    midi_score_base64 = encode_file_to_base64(midi_score_path)
     midi_plot_base64 = encode_file_to_base64(midi_plot_path)
     
     return JSONResponse(content={
         "midi_file_name": midi_file_name,
         "midi_file_base64": midi_file_base64,
         "midi_audio_base64": midi_audio_base64,
-        "midi_score_pdf_base64": midi_score_pdf_base64,
+        "midi_score_base64": midi_score_base64,
         "midi_plot_base64": midi_plot_base64,
         "bokeh_plot_json": bokeh_plot_json
     })
