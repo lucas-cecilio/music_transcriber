@@ -20,14 +20,13 @@ API_URL = "http://127.0.0.1:8000"
 response_type = "binary"  # 'binary' for encoded files, 'path' for path files
 
 # Title of the website
-st.title("Music Transcriber 🎵")
-st.write("")
+st.markdown("<h1 style='font-size: 48px; text-align: left;'>Music Transcriber 🎵</h1>", unsafe_allow_html=True)
 
-# How to use it
+# Greetings
 st.markdown("""
-### Transcribe an instrumental song to MIDI 
+#### Transcribe an instrumental song to MIDI and to music score!
 
-**Upload your audio and AI will do the magic! ✨**
+**Upload your audio and AI will do the magic ✨**
 """)
 st.write("")
 
@@ -58,7 +57,7 @@ if uploaded_file is not None:
 
         # Play the uploaded audio file
         st.write("")
-        st.write("Original audio:")
+        st.markdown("<p style='text-align: left; font-size: 15px;'>Original audio:</p>", unsafe_allow_html=True)
         st.audio(uploaded_file, format="audio/mp3")
         st.write("")
 
@@ -107,12 +106,19 @@ if "transcription_data" in st.session_state and st.session_state.transcription_d
 
     # Display a MIDI Graphic
     st.write("")
+    st.markdown("<p style='text-align: center; font-size: 18px;'>Graphic representation of generated MIDI</p>", unsafe_allow_html=True)
+    
     df_notes = pd.DataFrame(transcription_data["notes_dict"]) # Creating a dataframe with notes
     st.pyplot(plot_notes_seq(df_notes))
+    st.markdown(
+        "<p style='text-align: center; font-size: 13px;'><i>Work on your file with a <a href='https://signal.vercel.app/edit' target='_blank'>Online MIDI Editor</a></i></p>", 
+        unsafe_allow_html=True
+    )
     st.write("")
     
     # Play transcribed audio
-    st.write("Transcribed audio:")
+    st.write("")
+    st.markdown("<p style='text-align: left; font-size: 15px;'>Transcribed audio:</p>", unsafe_allow_html=True)
     st.audio(midi_audio, format="audio/wav")
     st.write("")
 
