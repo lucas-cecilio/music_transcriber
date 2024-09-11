@@ -3,6 +3,9 @@ midi2audio
 fastapi
 python-multipart
 uvicorn
+note-seq
+bokeh
+librosa
 selenium 
 chromedriver-binary
 webdriver-manager  
