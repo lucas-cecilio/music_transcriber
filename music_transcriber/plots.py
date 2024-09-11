@@ -31,8 +31,8 @@ def plot_notes_seq(df, dpi=300):
     # Adjust axis limits
     ax.set_xlim([df['start_time'].min() - 0.5, df['end_time'].max() + 0.5])
     ax.set_ylim([df['pitch'].min() - 2, df['pitch'].max() + 2])
-    ax.set_xlabel('Time(s)', fontsize=12)
-    ax.set_ylabel('Pitch', fontsize=12)
+    ax.set_xlabel('Time(s)', fontsize=14)
+    ax.set_ylabel('Pitch', fontsize=14)
 
     # Export as high-resolution PNG
     plt.grid(True)
