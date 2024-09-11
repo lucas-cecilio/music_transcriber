@@ -42,8 +42,8 @@ install_all:
 	@make checkpoint
 	@make setup
 
-clean:
-	@rm -f *.pyc
-
 test:
 	@rm -rf mt3 checkpoints
+
+docker_build:
+	docker build --tag=${GAR_IMAGE}:dev .

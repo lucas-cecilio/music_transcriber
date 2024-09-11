@@ -4,6 +4,9 @@ fastapi
 python-multipart
 streamlit
 uvicorn
+note-seq
+bokeh
+librosa
 selenium 
 chromedriver-binary
 webdriver-manager  
