@@ -1,125 +1,161 @@
 import streamlit as st
 import requests
 import base64
-import io
-import json
+from pathlib import Path
+
+from bokeh.embed import file_html
 from bokeh.embed import json_item
+from bokeh.resources import CDN
+from bokeh.plotting import show
+import streamlit.components.v1 as components
+
+st.set_page_config(
+            page_title="Music Transcriber", # => Quick reference - Streamlit
+            page_icon="🎵",
+            layout="centered", # wide
+            initial_sidebar_state="auto") # collapsed
 
 # Set the base API URL
 API_URL = "http://127.0.0.1:8000"
 
 # Set the response_type for transcribe endpoint
-response_type = "binary" # 'binary' for encoded files, 'path' for path files
+response_type = "binary"  # 'binary' for encoded files, 'path' for path files
 
 # Title of the website
-st.title("Music Transcription with Transformers")
+st.title("Music Transcriber 🎵")
+st.write("")
 
 # How to use it
 st.markdown("""
-### How to use it:
-This site is an interactive demo of a few music transcription models created by our team. 
-You can upload audio and have one of our models automatically transcribe it.
+### Transcribe an instrumental song to MIDI 
 
-**Instructions:**
-1. In the Load Model cell, choose either `Piano` for piano transcription or `Multi-instrument` for multi-instrument transcription.
-2. In the Upload Audio cell, choose an MP3 or WAV file from your computer when prompted.
-3. Transcribe the audio using the Transcribe Audio cell (it may take a few minutes depending on the length of the audio).
+**Upload your audio and AI will do the magic! ✨**
 """)
+st.write("")
 
 # Choose between two models
-model_type = st.radio("Choose a model", ["Piano", "Multi-instrument"]).lower()
+model_type = st.radio("Select if your audio is a piano or a multi-instrumental song:", ["Piano", "Multi-instrument"]).lower()
+st.write("")
 
 # Upload audio
 uploaded_file = st.file_uploader("Upload your audio file (.mp3 or .wav)", type=["mp3", "wav"])
 
+# Clean session state every time a new file is uploaded
 if uploaded_file is not None:
+    # Clear transcription data and download button states on every upload
+    st.session_state.transcription_data = None
+    st.session_state.midi_downloaded = False
+    st.session_state.pdf_downloaded = False
+    st.session_state.uploaded_filename = uploaded_file.name  # Track current file name
+
     # Convert uploaded file to the path in the directory and send to API
     files = {"file": (uploaded_file.name, uploaded_file.getvalue())}
     upload_response = requests.post(f"{API_URL}/upload-audio/", files=files)
-    
-    # Immediately play the uploaded audio file
-    st.audio(uploaded_file, format="audio/mp3")
-    
+
     if upload_response.status_code == 200:
         st.success("Audio file uploaded successfully!")
         file_data = upload_response.json()
         filename = file_data["filename"]
 
+        # play the uploaded audio file
+        st.write("")
+        st.write("Original audio:")
+        st.audio(uploaded_file, format="audio/mp3")
+        st.write("")
+
         # Display the "Transcribe" button
         if st.button("Transcribe"):
             with st.spinner('Transcribing...'):
-                
                 params = {
                     "filename": filename,
                     "model_type": model_type,
                     "response_type": response_type
                 }
-                
+
                 transcribe_response = requests.get(f"{API_URL}/transcribe/", params=params)
-                
+
                 if transcribe_response.status_code == 200:
-                    
                     transcription_data = transcribe_response.json()
-                    
-                    if response_type=='binary':
-                        # Decode the Base64 encoded data
-                        midi_file = base64.b64decode(transcription_data["midi_file_base64"])
-                        midi_audio = base64.b64decode(transcription_data["midi_audio_base64"])
-                        midi_score_pdf = base64.b64decode(transcription_data["midi_score_base64"])
-                        midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
-                    
-                    if response_type=='path':
-                        midi_file = transcription_data["midi_file_path"]
-                        midi_audio = transcription_data["midi_audio_path"]
-                        midi_score_pdf = transcription_data["midi_score_path"]
-                        midi_plot = transcription_data["midi_plot_path"]
 
-                    
-                    # Generate and display Music Score
-                    st.image(midi_plot)
-                    
-                    # Play transcribed audio
-                    st.audio(midi_audio, format="audio/wav")
+                    # Store transcription data in session state to avoid losing it on rerun
+                    st.session_state.transcription_data = transcription_data
+                    st.session_state.filename = filename
+                    st.session_state.response_type = response_type
 
-                    
-                    # Função para criar o botão de download
-                    def download_button(data, filename, label):
-                        filename = str(filename).replace(".wav", "")
-                        b64 = base64.b64encode(data).decode()  # Codifica os dados em base64
-                        href = f'<a href="data:application/octet-stream;base64,{b64}" download="{filename}">{label}</a>'
-                        return href
-                    
-                    # Criar colunas para organizar os botões de download
-                    col1, col2 = st.columns(2)
-                    
-                    # Botão para download do arquivo MIDI (.mid)
-                    with col1:
-                        st.markdown(download_button(midi_file, f"{filename}_transcribed.mid", "Download MIDI"), unsafe_allow_html=True)
-
-                    # Botão para download do arquivo PDF (.pdf)
-                    with col2:
-                        st.markdown(download_button(midi_score_pdf, f"{filename}_transcribed.pdf", "Download PDF"), unsafe_allow_html=True)
-                        
-                    # # Download buttons
-                    # # st.download_button(label="Download Score", data=midi_score_pdf)
-                    # st.download_button(label="Download MIDI File", data=midi_file)
-
+                    st.success("Transcription completed!")
 
                 else:
                     st.error("Transcription failed!")
     else:
         st.error("Failed to upload audio file.")
 
+# Check if transcription data is available in session state
+if "transcription_data" in st.session_state and st.session_state.transcription_data is not None:
+    transcription_data = st.session_state.transcription_data
+    filename = str(Path(st.session_state.filename).stem)
+    response_type = st.session_state.response_type
+
+    if response_type == 'binary':
+        # Decode the Base64 encoded data
+        midi_file = base64.b64decode(transcription_data["midi_file_base64"])
+        midi_audio = base64.b64decode(transcription_data["midi_audio_base64"])
+        midi_score_pdf = base64.b64decode(transcription_data["midi_score_base64"])
+        midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
+
+    if response_type == 'path':
+        midi_file = transcription_data["midi_file_path"]
+        midi_audio = transcription_data["midi_audio_path"]
+        midi_score_pdf = transcription_data["midi_score_path"]
+        midi_plot = transcription_data["midi_plot_path"]
+
+    # Generate and display Music Score
+    st.write("")
+    st.image(midi_plot)
+    
+    # # Check if there is a Bokeh plot available and render it
+    # if "bokeh_plot_json" in transcription_data:
+    #     bokeh_plot_json = transcription_data["bokeh_plot_json"]
+        
+    #     # Use json_item to convert the JSON into a Bokeh plot item
+    #     bokeh_item = json_item(bokeh_plot_json)
+        
+    #     # Render the Bokeh plot in Streamlit
+    #     components.html(file_html(bokeh_item, resources=CDN), height=500)
+
+    # Play transcribed audio
+    st.write("")
+    st.write("Transcribed audio:")
+    st.audio(midi_audio, format="audio/wav")
+
+    # Função para criar os botões de download
+    def create_download_buttons():
+        # Criar colunas para organizar os botões de download
+        col1, col2, col3, col4, col5 = st.columns([2, 3, 1, 3, 2])
+
+        # Botão para download do arquivo MIDI (.mid)
+        with col2:
+            midi_btn = st.download_button(
+                label="Download MIDI",
+                data=midi_file,
+                file_name=f"{filename}_transcribed.mid",
+                disabled=st.session_state.midi_downloaded
+            )
+            if midi_btn:
+                st.session_state.midi_downloaded = True
+
+        # Botão para download do arquivo PDF (.pdf)
+        with col4:
+            pdf_btn = st.download_button(
+                label="Download Score",
+                data=midi_score_pdf,
+                file_name=f"{filename}_transcribed.pdf",
+                disabled=st.session_state.pdf_downloaded
+            )
+            if pdf_btn:
+                st.session_state.pdf_downloaded = True
+
+    # Criar os botões de download
+    create_download_buttons()
+                        
 # # Add the GitHub link and sources button
 # st.markdown("[GitHub Project](https://github.com/lucas-cecilio/music_transcriber)")
-
-
-
-
-
-                    # # Show Bokeh plot
-                    # bokeh_plot_json = transcription_data["bokeh_plot_json"]
-                    # if bokeh_plot_json:
-                    #     st.bokeh_chart(json_item(bokeh_plot_json))
-                    # else:
-                    #     st.error("Failed to load Bokeh plot.")
