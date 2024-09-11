@@ -105,13 +105,19 @@ if "transcription_data" in st.session_state and st.session_state.transcription_d
         midi_score_pdf = transcription_data["midi_score_path"]
 
     # Display a MIDI Graphic
-    st.markdown("<p style='text-align: center; font-size: 17px;'>Graphic representation of generated MIDI</p>", unsafe_allow_html=True)
+    st.write("")
+    st.markdown("<p style='text-align: center; font-size: 18px;'>Graphic representation of generated MIDI</p>", unsafe_allow_html=True)
     
     df_notes = pd.DataFrame(transcription_data["notes_dict"]) # Creating a dataframe with notes
     st.pyplot(plot_notes_seq(df_notes))
+    st.markdown(
+        "<p style='text-align: center; font-size: 13px;'><i>Work on your file with a <a href='https://signal.vercel.app/edit' target='_blank'>Online MIDI Editor</a></i></p>", 
+        unsafe_allow_html=True
+    )
     st.write("")
     
     # Play transcribed audio
+    st.write("")
     st.markdown("<p style='text-align: left; font-size: 15px;'>Transcribed audio:</p>", unsafe_allow_html=True)
     st.audio(midi_audio, format="audio/wav")
     st.write("")
