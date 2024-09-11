@@ -1,7 +1,6 @@
 import base64
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse #, FileResponse
-from bokeh.embed import json_item
+from fastapi.responses import JSONResponse 
 from music_transcriber.utils import *
 from music_transcriber.params import *
 
@@ -65,10 +64,6 @@ async def transcribe(filename: str, model_type: str = "piano", response_type: st
     # Generate a dataframe of notes sequence
     notes_dict = sequence_to_dict(notes_sequence)
     
-    # Plot the notes sequence
-    # midi_plot_path, bokeh_plot = plot_midi(notes_sequence, midi_file_name, save_png=True)
-    # bokeh_plot_json = json_item(bokeh_plot)
-    
     if response_type == "path":
         return {
             "notes_dict": notes_dict,
@@ -82,7 +77,6 @@ async def transcribe(filename: str, model_type: str = "piano", response_type: st
     midi_file_base64 = encode_file_to_base64(midi_file_path)
     midi_audio_base64 = encode_file_to_base64(midi_audio_path)
     midi_score_base64 = encode_file_to_base64(midi_score_path)
-
     
     return JSONResponse(content={
         "notes_dict": notes_dict,
