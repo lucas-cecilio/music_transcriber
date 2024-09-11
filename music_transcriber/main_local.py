@@ -11,7 +11,7 @@ def complete_transcribe(model_type, audio_file):
     model = load_model(model_type)
     notes_sequence = transcribe_audio(model, audio_processed)
     midi_file_name, midi_file_path = download_midi(notes_sequence, audio_file_name)
-    midi_plot_path, _ = plot_midi(notes_sequence, midi_file_name, save_png=True)
+    # midi_plot_path, _, _ = plot_midi(notes_sequence, midi_file_name, save_png=True)
     midi_audio_path = midi_to_audio(midi_file_name, midi_file_path)
     midi_score_pdf_path = midi_to_score(midi_file_name, midi_file_path)
     

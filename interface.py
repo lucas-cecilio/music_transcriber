@@ -2,7 +2,10 @@ import streamlit as st
 import requests
 import base64
 from pathlib import Path
-from bokeh.embed import json_item
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from music_transcriber.plots import plot_notes_seq
 
 st.set_page_config(
     page_title="Music Transcriber", 
@@ -97,25 +100,19 @@ if "transcription_data" in st.session_state and st.session_state.transcription_d
         midi_file = base64.b64decode(transcription_data["midi_file_base64"])
         midi_audio = base64.b64decode(transcription_data["midi_audio_base64"])
         midi_score_pdf = base64.b64decode(transcription_data["midi_score_base64"])
-        midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
+        # midi_plot = base64.b64decode(transcription_data["midi_plot_base64"])
 
     if response_type == 'path':
         midi_file = transcription_data["midi_file_path"]
         midi_audio = transcription_data["midi_audio_path"]
         midi_score_pdf = transcription_data["midi_score_path"]
-        midi_plot = transcription_data["midi_plot_path"]
+        # midi_plot = transcription_data["midi_plot_path"]
 
     # Display a MIDI Graphic
     st.write("")
-    st.image(midi_plot)
-    st.write("You can work on your MIDI file with [Online MIDI Editor](<https://signal.vercel.app/edit>)")
+    df_notes = pd.DataFrame(transcription_data["notes_dict"])
+    st.pyplot(plot_notes_seq(df_notes))
     st.write("")
-    
-    # # Bokeh figure
-    # bokeh_figure_json = transcription_data["bokeh_plot_json"]
-    # st.bokeh_chart(bokeh_figure_json)
-    # # # bokeh_figure = json_item(bokeh_figure_json)
-    # # # st.write(bokeh_figure)
     
     # Play transcribed audio
     st.write("Transcribed audio:")
