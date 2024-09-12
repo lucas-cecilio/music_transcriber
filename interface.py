@@ -233,31 +233,43 @@ with tab3:
     # Team member 1
     with st.expander("🏄‍♂️ Lucas Cecilio"):
         st.write("""
-        I am a civil engineer with a background in Business Analysis and AI Consulting at IBM, where I worked for almost five years. My passion for data science led me to Le Wagon bootcamp, where I developed new skills in Machine Learning, Python, AI, and MLOPS. I am eager to apply these skills to data projects, advancing my career as a data scientist.
+        I am a civil engineer with a background in Business Analysis and AI Consulting at IBM, where I worked for almost five years. \
+            My passion for data science led me to Le Wagon bootcamp, where I developed new skills in Machine Learning, Python, AI, and MLOPS. \
+                I am eager to apply these skills to data projects, advancing my career as a data scientist.
         
+        Rio de Janeiro, Brasil\n
         [Lucas's LinkedIn](https://www.linkedin.com/in/lucasceciliocerqueira/)
         """)
 
     # Team member 2
     with st.expander("⚡ Gabriel Pereira"):
         st.write("""
-        Passionate about innovation and cutting-edge technology, I have always enjoyed exploring software development and AI. Le Wagon bootcamp provided me with the hands-on experience and the latest knowledge in these fields, allowing me to stay ahead of trends and tackle new challenges in the tech industry.
+        Passionate about innovation and cutting-edge technology, I have always enjoyed exploring software development and AI. \
+            Le Wagon bootcamp provided me with the hands-on experience and the latest knowledge in these fields, allowing me to stay \
+                ahead of trends and tackle new challenges in the tech industry.
         
+        Rio de Janeiro, Brasil\n
         [Gabriel's LinkedIn](https://www.linkedin.com/in/gabr-pereira/)
         """)
 
     # Team member 3
     with st.expander("😎 Ilya Belov"):
         st.write("""
-        I spent the majority of my career as a Credit Analyst in the banking industry, but my curiosity about coding and machine learning brought me to Le Wagon bootcamp. Here, I gained the practical skills necessary to transition into the tech industry, and I am now focused on pursuing a career in this exciting field.
+        I spent the majority of my career as a Credit Analyst in the banking industry, but my curiosity about coding and machine learning \
+            brought me to Le Wagon bootcamp. Here, I gained the practical skills necessary to transition into the tech industry, and I am \
+                now focused on pursuing a career in this exciting field.
         
+        São Paulo, Brasil / Milan, Italy\n
         [Ilya's LinkedIn](https://www.linkedin.com/in/ilya-belov1/)
         """)
 
     # Team member 4
     with st.expander("👨‍🍳 Aloisio Marques"):
         st.write("""
-        I graduated in Gastronomy and managed my own business for 12 years until the pandemic prompted me to seek new challenges. Le Wagon bootcamp opened the door to the world of data science, where I learned essential skills in Machine Learning, Python, and AI. I am now eager to apply this knowledge in my future career endeavors.
+        I graduated in Gastronomy and managed my own business for 12 years until the pandemic prompted me to seek new challenges. \
+            Le Wagon bootcamp opened the door to the world of data science, where I learned essential skills in Machine Learning, \
+                Python, and AI. I am now eager to apply this knowledge in my future career endeavors.
         
+        Berlin, Germany\n
         [Aloisio's LinkedIn](https://www.linkedin.com/in/aloisio-marques-28b97a2a4/)
         """)
