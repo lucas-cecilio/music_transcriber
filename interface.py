@@ -6,9 +6,9 @@ import pandas as pd
 from music_transcriber.plots import plot_notes_seq
 
 st.set_page_config(
-    page_title="Music Transcriber", 
+    page_title="Music Transcriber",
     page_icon="🎵",
-    layout="centered", 
+    layout="centered",
     initial_sidebar_state="auto"
 )
 
@@ -111,15 +111,15 @@ with tab1:
         # Display a MIDI Graphic
         st.write("")
         st.markdown("<p style='text-align: center; font-size: 18px;'>Graphic representation of generated MIDI</p>", unsafe_allow_html=True)
-        
+
         df_notes = pd.DataFrame(transcription_data["notes_dict"]) # Creating a dataframe with notes
         st.pyplot(plot_notes_seq(df_notes))
         st.markdown(
-            "<p style='text-align: center; font-size: 13px;'><i>Work on your file with a <a href='https://signal.vercel.app/edit' target='_blank'>Online MIDI Editor</a></i></p>", 
+            "<p style='text-align: center; font-size: 13px;'><i>Work on your file with a <a href='https://signal.vercel.app/edit' target='_blank'>Online MIDI Editor</a></i></p>",
             unsafe_allow_html=True
         )
         st.write("")
-        
+
         # Play transcribed audio
         st.write("")
         st.markdown("<p style='text-align: left; font-size: 15px;'>Transcribed audio:</p>", unsafe_allow_html=True)
@@ -150,16 +150,74 @@ with tab1:
         # Create the download buttons
         create_download_buttons()
 
-# About tab
+# About Tab
 with tab2:
     st.markdown("<h2 style='font-size: 40px; text-align: left;'>About the project 🛈</h2>", unsafe_allow_html=True)
+
+    # Paragraph 1: Why
     st.write("""
-    **Music Transcriber** is an AI-powered tool that allows users to convert audio files to MIDI and music score formats.
-    The tool is ideal for musicians, producers, or anyone who wants to transcribe instrumental audio into editable music.
+    **Why**
+    The process of manually transcribing music is not only time-consuming but also requires a considerable level of expertise. Musicians and composers often find it challenging to transcribe complex audio, particularly when dealing with intricate harmonies or fast passages. This can stifle creativity, as time spent on manual transcription could be better used for composing or arranging. Moreover, many individuals lack the technical skills needed to accurately transcribe music, making it an inaccessible task for amateurs or those new to music production. An AI-powered music transcriber can alleviate these issues, providing a more efficient, accurate, and user-friendly alternative.
     """)
-    st.write("Content.")
+
+    # Paragraph 2: Target
+    st.write("""
+    **Target**
+    Our AI-powered music transcriber is designed for a wide range of users. Musicians and composers can quickly transcribe their improvisations or arrangements, making it easier to capture fleeting ideas. Music producers benefit from being able to edit and arrange transcribed MIDI files, streamlining the production process. Educators and students can use the tool to analyze music, aiding in both teaching and learning complex pieces. Sound engineers and audio technicians will find it invaluable for quickly creating transcriptions from recordings, improving workflow efficiency. Even amateurs, who might not have formal training in music theory, can use the tool to transcribe and edit music with ease.
+    """)
+
+    # Paragraph 3: What is MIDI
+    st.write("""
+    **What is MIDI**
+    MIDI (Musical Instrument Digital Interface) is a technical standard that describes a communications protocol, digital interface, and electrical connectors that connect a wide variety of electronic musical instruments, computers, and related audio devices. MIDI enables the creation and transfer of digital music data, making it an essential tool for modern music production. It allows for the manipulation of pitch, tempo, and other musical elements, offering extensive creative control to musicians and producers. MIDI files are compact, easy to edit, and can be used to trigger virtual instruments, making them highly versatile in music production.
+    """)
+
+    # Paragraph 4: How the Model Works
+    st.write("""
+    **How the Model Works**
+    The notebook supports two pre-trained models:
+
+    - The piano transcription model from our ISMIR 2021 paper
+    - The multi-instrument transcription model from our ICLR 2022 paper
+
+    Here's how it works:
+    1. Choose between the two models based on your transcription needs.
+    2. Upload an audio file in MP3 or WAV format.
+    3. Play the original audio to verify the input.
+    4. Click on the 'Transcribe' button to start the transcription process.
+    5. View the MIDI graphic generated from the transcription.
+    6. Play the transcribed audio to ensure accuracy.
+    7. Download the PDF file containing the music score for further use.
+    """)
 
 # Team Tab
 with tab3:
     st.markdown("<h2 style='font-size: 40px; text-align: left;'>Our team 🏆</h2>", unsafe_allow_html=True)
-    st.write("Content.")
+
+    # Team member 1
+    with st.expander("Lucas Cecilio Cerqueira"):
+        st.write("""
+        I am a civil engineer with a background in business analysis and AI consulting at IBM telecom projects in Brazil, where I worked for almost five years. My passion for data science led me to Le Wagon bootcamp, where I developed new skills in Machine Learning, Python, AI, and MLOPS. I am eager to apply these skills to data projects, advancing my career as a data scientist.
+        [LinkedIn](https://www.linkedin.com/in/lucasceciliocerqueira/)
+        """)
+
+    # Team member 2
+    with st.expander("Gabriel Pereira"):
+        st.write("""
+        Passionate about innovation and cutting-edge technology, I have always enjoyed exploring software development and AI. Le Wagon bootcamp provided me with the hands-on experience and the latest knowledge in these fields, allowing me to stay ahead of trends and tackle new challenges in the tech industry.
+        [LinkedIn](https://www.linkedin.com/in/gabr-pereira/)
+        """)
+
+    # Team member 3
+    with st.expander("Ilya Belov"):
+        st.write("""
+        I spent the majority of my career as a Credit Analyst in the banking industry, but my curiosity about coding and machine learning brought me to Le Wagon bootcamp. Here, I gained the practical skills necessary to transition into the tech industry, and I am now focused on pursuing a career in this exciting field.
+        [LinkedIn](https://www.linkedin.com/in/ilya-belov1/)
+        """)
+
+    # Team member 4
+    with st.expander("Aloisio Marques"):
+        st.write("""
+        I graduated in Gastronomy and managed my own business for 12 years until the pandemic prompted me to seek new challenges. Le Wagon bootcamp opened the door to the world of data science, where I learned essential skills in Machine Learning, Python, and AI. I am now eager to apply this knowledge in my future career endeavors.
+        [LinkedIn](https://www.linkedin.com/in/aloisio-marques-28b97a2a4/)
+        """)
