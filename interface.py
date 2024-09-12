@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # Set the base API URL
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://music-transcriber-98034930128.europe-west1.run.app/"
 
 # Set the response_type for transcribe endpoint
 response_type = "binary"  # 'binary' for encoded files, 'path' for path files
