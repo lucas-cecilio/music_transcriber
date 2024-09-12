@@ -35,7 +35,7 @@ api:
 	@uvicorn api:app --reload --loop asyncio
 
 streamlit:
-	@streamlit run Home.py
+	@streamlit run interface.py
 
 install_all:
 	@make mt3
